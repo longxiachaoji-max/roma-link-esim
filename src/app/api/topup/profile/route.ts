@@ -12,6 +12,7 @@ function getSupabase() {
 
 export async function GET(request: Request) {
   try {
+    const includeContact = new URL(request.url).searchParams.get('includeContact') === '1';
     const authorization = request.headers.get('authorization') || '';
     const accessToken = authorization.startsWith('Bearer ') ? authorization.slice(7) : '';
     if (!accessToken) return NextResponse.json({ error: '請先登入' }, { status: 401 });
@@ -23,7 +24,7 @@ export async function GET(request: Request) {
 
     let { data: customer } = await supabase
       .from('customers')
-      .select('email, name, token_balance')
+      .select('id, email, name, token_balance')
       .eq('email', authUser.email)
       .single();
 
@@ -35,13 +36,31 @@ export async function GET(request: Request) {
           name: authUser.user_metadata?.name || authUser.email.split('@')[0],
           token_balance: 0
         }])
-        .select('email, name, token_balance')
+        .select('id, email, name, token_balance')
         .single();
       if (createError) throw createError;
       customer = createdCustomer;
     }
 
-    return NextResponse.json({ customer });
+    let contactProfile: { phone: string | null; contact_address: string | null } | null = null;
+    if (includeContact) {
+      const { data, error } = await supabase
+        .from('customer_private_profiles')
+        .select('phone, contact_address')
+        .eq('customer_id', customer.id)
+        .maybeSingle();
+      if (error) throw error;
+      contactProfile = data;
+    }
+
+    return NextResponse.json({
+      customer: {
+        email: customer.email,
+        name: customer.name,
+        token_balance: customer.token_balance,
+        ...(includeContact ? { contact_profile: contactProfile } : {})
+      }
+    });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : '無法載入會員資料' }, { status: 500 });
   }

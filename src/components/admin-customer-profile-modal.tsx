@@ -9,6 +9,8 @@ interface PrivateProfile {
   national_id: string | null;
   birth_date: string | null;
   residential_address: string | null;
+  phone: string | null;
+  contact_address: string | null;
 }
 
 interface IdentityVerification {
@@ -40,6 +42,8 @@ export default function AdminCustomerProfileModal({ customer, onClose, onChanged
   const [nationalId, setNationalId] = useState('');
   const [birthDate, setBirthDate] = useState('');
   const [residentialAddress, setResidentialAddress] = useState('');
+  const [phone, setPhone] = useState('');
+  const [contactAddress, setContactAddress] = useState('');
   const [verification, setVerification] = useState<IdentityVerification | null>(null);
   const [detail, setDetail] = useState<VerificationDetail | null>(null);
   const [reviewNote, setReviewNote] = useState('');
@@ -53,6 +57,8 @@ export default function AdminCustomerProfileModal({ customer, onClose, onChanged
     setNationalId(customer.private_profile?.national_id || '');
     setBirthDate(customer.private_profile?.birth_date || '');
     setResidentialAddress(customer.private_profile?.residential_address || '');
+    setPhone(customer.private_profile?.phone || '');
+    setContactAddress(customer.private_profile?.contact_address || '');
     setVerification(customer.identity_verification);
     setReviewNote(customer.identity_verification?.review_note || '');
     setDetail(null);
@@ -69,7 +75,7 @@ export default function AdminCustomerProfileModal({ customer, onClose, onChanged
       const response = await adminFetch('/api/admin/customers', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customerId: customer.id, legalName, nationalId, birthDate, residentialAddress })
+        body: JSON.stringify({ customerId: customer.id, legalName, nationalId, birthDate, residentialAddress, phone, contactAddress })
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || '基本資料儲存失敗');
@@ -143,7 +149,9 @@ export default function AdminCustomerProfileModal({ customer, onClose, onChanged
         <label className="text-sm text-white/55">真實姓名<input value={legalName} onChange={event => setLegalName(event.target.value)} maxLength={80} className="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/25 px-3 text-white outline-none focus:border-cyan/60" /></label>
         <label className="text-sm text-white/55">身分證字號<input value={nationalId} onChange={event => setNationalId(event.target.value.toUpperCase())} maxLength={30} className="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/25 px-3 font-mono uppercase text-white outline-none focus:border-cyan/60" /></label>
         <label className="text-sm text-white/55">生日<input type="date" value={birthDate} onChange={event => setBirthDate(event.target.value)} className="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/25 px-3 text-white outline-none focus:border-cyan/60" /></label>
-        <label className="text-sm text-white/55">地址<input value={residentialAddress} onChange={event => setResidentialAddress(event.target.value)} maxLength={300} className="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/25 px-3 text-white outline-none focus:border-cyan/60" /></label>
+        <label className="text-sm text-white/55">電話<input type="tel" inputMode="tel" value={phone} onChange={event => setPhone(event.target.value)} maxLength={30} className="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/25 px-3 text-white outline-none focus:border-cyan/60" /></label>
+        <label className="text-sm text-white/55 sm:col-span-2">戶籍地址（身分證上的地址）<input value={residentialAddress} onChange={event => setResidentialAddress(event.target.value)} maxLength={300} className="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/25 px-3 text-white outline-none focus:border-cyan/60" /></label>
+        <label className="text-sm text-white/55 sm:col-span-2">聯絡地址<input value={contactAddress} onChange={event => setContactAddress(event.target.value)} maxLength={300} className="mt-2 h-11 w-full rounded-md border border-white/10 bg-black/25 px-3 text-white outline-none focus:border-cyan/60" /></label>
         <button type="button" onClick={() => void saveProfile()} disabled={saving} className="inline-flex h-11 items-center justify-center gap-2 rounded-md bg-cyan px-5 font-black text-[#081318] disabled:opacity-40 sm:col-span-2 sm:justify-self-end"><Save size={17} />儲存基本資料</button>
       </section>
 

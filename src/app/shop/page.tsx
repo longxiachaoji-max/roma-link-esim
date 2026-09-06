@@ -334,9 +334,17 @@ export default function PhysicalShopPage() {
           return;
         }
       }
-      const response = await fetch('/api/topup/profile', { headers: { Authorization: `Bearer ${data.session.access_token}` }, cache: 'no-store' });
+      const response = await fetch('/api/topup/profile?includeContact=1', { headers: { Authorization: `Bearer ${data.session.access_token}` }, cache: 'no-store' });
       const result = await response.json();
-      if (response.ok) setTokenBalance(Number(result.customer?.token_balance || 0));
+      if (response.ok) {
+        setTokenBalance(Number(result.customer?.token_balance || 0));
+        setShipping(current => ({
+          ...current,
+          recipientName: current.recipientName || String(result.customer?.name || ''),
+          recipientPhone: current.recipientPhone || String(result.customer?.contact_profile?.phone || ''),
+          shippingAddress: current.shippingAddress || String(result.customer?.contact_profile?.contact_address || '')
+        }));
+      }
     }
     setCheckoutMessage('');
     setCartOpen(false); setCheckoutOpen(true);

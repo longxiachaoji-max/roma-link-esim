@@ -26,7 +26,7 @@ export async function GET(request: Request) {
     const customerIds = (customers || []).map(customer => customer.id);
     const [{ data: profiles, error: profileError }, { data: verifications, error: verificationError }] = customerIds.length
       ? await Promise.all([
-        supabase.from('customer_private_profiles').select('customer_id, legal_name, national_id, birth_date, residential_address').in('customer_id', customerIds),
+        supabase.from('customer_private_profiles').select('customer_id, legal_name, national_id, birth_date, residential_address, phone, contact_address').in('customer_id', customerIds),
         supabase.from('customer_identity_verifications').select('id, customer_id, status, submitted_at, reviewed_at, review_note').in('customer_id', customerIds)
       ])
       : [{ data: [], error: null }, { data: [], error: null }];
@@ -54,20 +54,26 @@ export async function PUT(request: Request) {
     const nationalId = String(body.nationalId || '').trim().toUpperCase().replace(/\s+/g, '').slice(0, 30) || null;
     const birthDate = String(body.birthDate || '').trim() || null;
     const residentialAddress = String(body.residentialAddress || '').trim().slice(0, 300) || null;
+    const phone = String(body.phone || '').trim().slice(0, 30) || null;
+    const contactAddress = String(body.contactAddress || '').trim().slice(0, 300) || null;
     if (!customerId) return NextResponse.json({ error: '找不到會員資料' }, { status: 400 });
     if (nationalId && !/^[A-Z0-9-]{4,30}$/.test(nationalId)) return NextResponse.json({ error: '身分證字號格式不正確' }, { status: 400 });
     if (birthDate && (!/^\d{4}-\d{2}-\d{2}$/.test(birthDate) || birthDate < '1900-01-01' || birthDate > new Date().toISOString().slice(0, 10))) {
       return NextResponse.json({ error: '生日日期不正確' }, { status: 400 });
     }
-    if (residentialAddress && residentialAddress.length < 5) return NextResponse.json({ error: '請填寫完整地址' }, { status: 400 });
+    if (residentialAddress && residentialAddress.length < 5) return NextResponse.json({ error: '請填寫完整戶籍地址' }, { status: 400 });
+    if (phone && phone.length < 5) return NextResponse.json({ error: '請填寫完整電話' }, { status: 400 });
+    if (contactAddress && contactAddress.length < 5) return NextResponse.json({ error: '請填寫完整聯絡地址' }, { status: 400 });
     const { data, error } = await supabase.from('customer_private_profiles').upsert({
       customer_id: customerId,
       legal_name: legalName,
       national_id: nationalId,
       birth_date: birthDate,
       residential_address: residentialAddress,
+      phone,
+      contact_address: contactAddress,
       updated_at: new Date().toISOString()
-    }, { onConflict: 'customer_id' }).select('customer_id, legal_name, national_id, birth_date, residential_address').single();
+    }, { onConflict: 'customer_id' }).select('customer_id, legal_name, national_id, birth_date, residential_address, phone, contact_address').single();
     if (error?.code === '23505') return NextResponse.json({ error: '此身分證字號已由其他會員使用' }, { status: 409 });
     if (error) throw error;
     return NextResponse.json({ success: true, profile: data });

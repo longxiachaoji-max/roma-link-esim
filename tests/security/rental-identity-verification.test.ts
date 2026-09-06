@@ -16,6 +16,8 @@ const shopPage = readFileSync('src/app/shop/page.tsx', 'utf8');
 const pendingConfirmationMigration = readFileSync('supabase/migrations/20260904170022_allow_pending_confirmation_physical_orders.sql', 'utf8');
 const identityProfileMigration = readFileSync('supabase/migrations/20260904210412_add_identity_profile_fields.sql', 'utf8');
 const privateProfileMigration = readFileSync('supabase/migrations/20260905093000_add_customer_private_profiles.sql', 'utf8');
+const contactProfileMigration = readFileSync('supabase/migrations/20260906182359_add_customer_contact_profile_fields.sql', 'utf8');
+const topupProfileRoute = readFileSync('src/app/api/topup/profile/route.ts', 'utf8');
 
 test('rental checkout is enforced server-side', () => {
   assert.match(checkoutRoute, /verification\?\.status !== 'APPROVED'/);
@@ -98,4 +100,15 @@ test('identity profile fields are stored and edited only through the admin area'
   assert.match(adminCustomersRoute, /customer_private_profiles/);
   assert.match(adminCustomersPage, /推薦設定[\s\S]*setSelectedProfileCustomer/);
   assert.doesNotMatch(adminCustomersPage, /AdminIdentityVerifications/);
+});
+
+test('contact details are stored on the customer profile without scanning order history', () => {
+  assert.match(contactProfileMigration, /add column if not exists phone text/);
+  assert.match(contactProfileMigration, /add column if not exists contact_address text/);
+  assert.match(contactProfileMigration, /after insert on public\.physical_orders/);
+  assert.match(contactProfileMigration, /sync_customer_contact_profile_from_order/);
+  assert.match(adminComponent, /戶籍地址（身分證上的地址）/);
+  assert.match(adminComponent, /聯絡地址/);
+  assert.match(topupProfileRoute, /includeContact/);
+  assert.doesNotMatch(topupProfileRoute, /from\('physical_orders'\)/);
 });
