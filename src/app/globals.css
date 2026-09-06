@@ -59,6 +59,18 @@
   .home-section-reveal {
     animation: homeSectionReveal 0.65s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
+
+  .card-glass-enter {
+    animation: cardGlassEnter 0.75s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .card-glass-link {
+    animation: cardGlassLinkEnter 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .card-glass-link:hover .card-glass-icon {
+    transform: scale(1.06) rotate(-2deg);
+  }
   
   @keyframes slideInRight {
     from { transform: translateX(100%); opacity: 0; }
@@ -79,12 +91,28 @@
     to { transform: translateY(0); opacity: 1; }
   }
 
+  @keyframes cardGlassEnter {
+    from { transform: translateY(18px) scale(0.985); opacity: 0; filter: blur(8px); }
+    to { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
+  }
+
+  @keyframes cardGlassLinkEnter {
+    from { transform: translateY(12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .animate-slide-in-right,
     .animate-fade-in-up,
     .home-carousel,
-    .home-section-reveal {
+    .home-section-reveal,
+    .card-glass-enter,
+    .card-glass-link {
       animation: none;
+    }
+
+    .card-glass-link:hover .card-glass-icon {
+      transform: none;
     }
   }
 }
