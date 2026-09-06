@@ -97,6 +97,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.55
     },
+    {
+      url: 'https://firstesim.space/card',
+      changeFrequency: 'monthly',
+      priority: 0.5
+    },
     ...physicalProducts.map(product => ({
       url: `https://firstesim.space/shop/${encodeURIComponent(product.id)}`,
       lastModified: product.updatedAt ? new Date(product.updatedAt) : undefined,
