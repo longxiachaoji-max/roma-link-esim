@@ -4,6 +4,7 @@ import Script from "next/script";
 import { serializeJsonLd } from "@/lib/json-ld";
 import { OFFICIAL_SOCIAL_PROFILE_URLS } from "@/lib/social-profiles";
 import ReferralLinkCapture from "@/components/referral-link-capture";
+import SiteMotion from "@/components/site-motion";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -127,7 +128,7 @@ export default function RootLayout({
         ) : null}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(websiteStructuredData) }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: serializeJsonLd(organizationStructuredData) }} />
-        {children}
+        <SiteMotion>{children}</SiteMotion>
       </body>
     </html>
   );

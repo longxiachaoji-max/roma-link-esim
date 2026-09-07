@@ -52,6 +52,37 @@
     animation: fadeInUp 0.4s ease-out forwards;
   }
 
+  .site-motion-page {
+    min-height: 100svh;
+    animation: sitePageEnter 380ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .site-motion-page.site-page-leaving {
+    pointer-events: none;
+    animation: sitePageExit 150ms cubic-bezier(0.4, 0, 1, 1) forwards;
+  }
+
+  .site-motion-root :where(button:not(:disabled), [role='button'], a[href]) {
+    -webkit-tap-highlight-color: transparent;
+    transition-property: scale, translate, filter, opacity, color, background-color, border-color, box-shadow;
+    transition-duration: 180ms;
+    transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .site-motion-root :where(button:not(:disabled), [role='button'], a[href]):active,
+  .site-motion-root :where(button:not(:disabled), [role='button'], a[href]).site-control-pressed {
+    scale: 0.965;
+    translate: 0 1px;
+    filter: brightness(1.09) saturate(1.05);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .site-motion-root :where(button:not(:disabled), [role='button'], a[class*='rounded'][href]):hover {
+      scale: 1.018;
+      filter: brightness(1.055) saturate(1.035);
+    }
+  }
+
   .home-carousel {
     animation: homeCarouselReveal 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
@@ -321,6 +352,16 @@
     to { transform: translateY(0); opacity: 1; }
   }
 
+  @keyframes sitePageEnter {
+    from { opacity: 0; translate: 0 9px; filter: blur(3px); }
+    to { opacity: 1; translate: none; filter: none; }
+  }
+
+  @keyframes sitePageExit {
+    from { opacity: 1; translate: none; filter: none; }
+    to { opacity: 0; translate: 0 -5px; filter: blur(2px); }
+  }
+
   @keyframes homeCarouselReveal {
     from { transform: translateY(10px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
@@ -361,6 +402,8 @@
   @media (prefers-reduced-motion: reduce) {
     .animate-slide-in-right,
     .animate-fade-in-up,
+    .site-motion-page,
+    .site-motion-page.site-page-leaving,
     .home-carousel,
     .home-section-reveal,
     .card-glass-enter,
@@ -368,6 +411,15 @@
     .card-stage-light-a,
     .card-stage-light-b {
       animation: none;
+    }
+
+    .site-motion-root :where(button:not(:disabled), [role='button'], a[href]),
+    .site-motion-root :where(button:not(:disabled), [role='button'], a[href]):active,
+    .site-motion-root :where(button:not(:disabled), [role='button'], a[href]).site-control-pressed {
+      scale: 1;
+      translate: none;
+      filter: none;
+      transition: none;
     }
 
     .card-glass-shell,
